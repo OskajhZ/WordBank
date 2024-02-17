@@ -202,6 +202,7 @@ int function_detector(char str[], char param[], char content[])  /*return type a
     else if(strcmp(command,"calculate")==0) return 5;
     else if(strcmp(command, "kernel")==0) return 6;
     else if(strcmp(command, "practice")==0 || strcmp(command, "practise")==0) return 7;
+    else if(strcmp(command,"help")==0) return 8;
     else return -1;
 }
 
@@ -398,7 +399,7 @@ void list(FILE *fp, char param[], char content[])  /*4*/
         return;
     }
 
-    if(strcmp(param,"-all")==0 || strcmp(param, "-a")==0)
+    if(strcmp(param,"--all")==0 || strcmp(param, "-a")==0)
     {
         int i;
         for(i=0;i<num;i++)
@@ -406,7 +407,7 @@ void list(FILE *fp, char param[], char content[])  /*4*/
             printword(all[i],'y');
         }
     }
-    else if(strcmp(param, "-date")==0 || strcmp(param, "-d")==0)
+    else if(strcmp(param, "--date")==0 || strcmp(param, "-d")==0)
     {
         int year, month, day;
         int condition=date_split(content, &year, &month, &day);
@@ -442,7 +443,7 @@ void list(FILE *fp, char param[], char content[])  /*4*/
             }
         }
     }
-    else if(strcmp(param,"-class")==0 || strcmp(param, "-c")==0)
+    else if(strcmp(param,"--class")==0 || strcmp(param, "-c")==0)
     {
         word list[MAX];
         int i,calc=0;
@@ -469,7 +470,7 @@ void list(FILE *fp, char param[], char content[])  /*4*/
             }
         }
     }
-    else printf("\033[31mERROR: parameter error.\033[0m Available parameter: -a (-all), -c (-class), -d (-date)\n");
+    else printf("\033[31mERROR: parameter error.\033[0m Available parameter: -a (--all), -c (--class), -d (--date)\n");
 }
 
 void practice(FILE *fp, char param[], char content[])
@@ -537,10 +538,6 @@ void practice(FILE *fp, char param[], char content[])
             printword(list[idx],'n');
         }
     }
-    else if(strcmp(param, "-h")==0)
-    {
-        printf("Valid cammand:\npractice [-c (provide Chinese, acquiesent) / -e (provide English)] [year.month.day / all(acquiesent)]\n");
-    }
     else
     {
         printword(list[idx],'e');
@@ -564,6 +561,18 @@ void practice(FILE *fp, char param[], char content[])
 
 }
 
+void help()
+{
+    printf("基础命令如下：\n");
+    printf("    %-20s 用于计数内核中全部单词。无参数。\n","calculate");
+    printf("    %-20s 用于向内核添加单词。\n","addword/add");
+    printf("    %-20s 用于删除内核中已经存在的单词。\n","delword/del");
+    printf("    %-20s 用于查询内核中的单词。\n","search");
+    printf("    %-20s 用于列出满足特定条件的单词。\n","list");
+    printf("    %-20s 练习功能。\n","practice/practise");
+    printf("    %-20s 用于内核管理。\n","kernel");
+    printf("键入“命令 -h”或“命令 --help”获取更多详情\n");
+}
 /*Upon: Operating Functions*/
 
 /*Below: File managing Functions*/
@@ -658,6 +667,12 @@ int main(void)
             {
                 case 1:  /*add word*/
                 {
+                    if(strcmp(param,"-h")==0 || strcmp(param,"--help")==0)
+                    {
+                        printf("该命令用于向内核添加单词。\n");
+                        printf("语法：addword\\add [English] [class].[中文]\n");
+                        continue;
+                    }
                     if(fp==NULL) fp=fopen(kernel_dir,"wb+");
 
                     int before=calculate(fp);
@@ -675,6 +690,12 @@ int main(void)
 
                 case 2:  /*delete word*/
                 {
+                    if(strcmp(param,"-h")==0 || strcmp(param,"--help")==0)
+                    {
+                        printf("该命令用于删除内核中已经存在的单词。\n");
+                        printf("语法：delword [English/中文]\n");
+                        continue;
+                    }
                     if(fp==NULL) 
                     {
                         printf("\033[31mERROR: kernel start failed.\033[0m\n");
@@ -702,6 +723,12 @@ int main(void)
 
                 case 3:  /*search word*/
                 {
+                    if(strcmp(param,"-h")==0 || strcmp(param,"--help")==0)
+                    {
+                        printf("该命令用于查询内核中的单词\n");
+                        printf("语法：search [English/中文]\n");
+                        continue;
+                    }
                     if(fp==NULL) 
                     {
                         printf("ERROR: kernel start failed.\n");
@@ -713,6 +740,14 @@ int main(void)
 
                 case 4:  /*list*/
                 {
+                    if(strcmp(param,"-h")==0 || strcmp(param,"--help")==0)
+                    {
+                        printf("该命令用于列出满足特定条件的单词。\n");
+                        printf(    "%-20s 用于列出内核中全部单词\n","list -a/--all");
+                        printf(    "%-20s 按词性列出单词\n","list -c [class]");
+                        printf(    "%-20s 按添加日期列出单词\n","list -d year.month.day");
+                        continue;
+                    }
                     if(fp==NULL) 
                     {
                         printf("\033[31mERROR: kernel start failed.\033[0m\n");
@@ -723,6 +758,17 @@ int main(void)
 
                 case 5:  /*calculate word number*/
                 {
+                    if(strcmp(param,"-h")==0 || strcmp(param,"--help")==0)
+                    {
+                        printf("此命令无参数与值。\n");
+                        continue;
+                    }
+                    else if(strcmp(param,"")!=0 || strcmp(content,"")!=0)
+                    {
+                        printf("\033[31mError: syntax error.\033[0m\n");
+                        continue;
+                    }
+                
                     if(fp==NULL) 
                     {
                         printf("\033[31mERROR: kernel start failed.\033[0m\n");
@@ -761,15 +807,40 @@ int main(void)
                     {
                         printf("%s\n",kernel_dir);
                     }
+                    else if(strcmp(param,"-h")==0 || strcmp(param,"--help")==0)
+                    {
+                        printf("kernel -p：打印当前内核所在路径。\n");
+                        printf("kernel -c [path]：更换内核。\n");
+                        continue;
+                    }
                     else printf("\033[31mInvalid parameter.\033[0m Available:\n-c: change kernel path\n-p: print current kernel path\n");
                 } break;
 
                 case 7:  /*practice*/
                 {
+                    if(strcmp(param,"-h")==0 || strcmp(param,"--help")==0)
+                    {
+                        printf("练习功能，按特定条件随机给出中文或英文，用户输入对应的英文或中文，自动判断用户回答是否正确，并给出正确答案。\n");
+                        printf("参数说明：\n");
+                        printf("    -c：给出中文，输入英文。\n    -e：给出英文，输入中文\n");
+                        printf("值说明：\n");
+                        printf("    [year].[month].[day]：从在指定日期加入的单词中选词。\n    all：从内核所有单词中选词。\n");
+                        printf("当无参数时，默认给出中文；无值时，默认从整个内核中选词。\n");
+                        continue;
+                    }
                     practice(fp, param, content);
                 } break;
 
-                default: printf("\033[31mCommand Error.\033[0m Available commands:\naddword\ndelword\nsearch\nlist\ncalculate\npractice\nkernel\n");
+                case 8:
+                {
+                    help();
+                } break;
+
+                default: 
+                {
+                    printf("\033[31mCommand Error.\033[0m\n");
+                    printf("Available commands: addword, delword, search, list, calculate, practice, kernel, help\n");
+                }
             }
             fclose(fp);
         }
