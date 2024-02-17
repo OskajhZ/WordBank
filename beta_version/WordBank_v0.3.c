@@ -763,12 +763,7 @@ int main(void)
                         printf("此命令无参数与值。\n");
                         continue;
                     }
-                    else if(strcmp(param,"")!=0 || strcmp(content,"")!=0)
-                    {
-                        printf("\033[31mError: syntax error.\033[0m\n");
-                        continue;
-                    }
-                
+
                     if(fp==NULL) 
                     {
                         printf("\033[31mERROR: kernel start failed.\033[0m\n");
