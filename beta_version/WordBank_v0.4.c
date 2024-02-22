@@ -195,8 +195,8 @@ int function_detector(char str[], char param[], char content[])  /*return type a
         }
     }
 
-    if(strcmp(command,"addword")==0) return 1;
-    else if(strcmp(command,"delword")==0) return 2;
+    if(strcmp(command,"addword")==0 || strcmp(command,"add")==0) return 1;
+    else if(strcmp(command,"delword")==0 || strcmp(command,"del")==0 || strcmp(command,"delete")==0) return 2;
     else if(strcmp(command,"searchword")==0 || strcmp(command,"search")==0) return 3;
     else if(strcmp(command,"list")==0 || strcmp(command,"listall")==0) return 4;
     else if(strcmp(command,"calculate")==0) return 5;
