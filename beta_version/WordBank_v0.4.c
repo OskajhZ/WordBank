@@ -479,7 +479,7 @@ void practice(FILE *fp, char param[], char content[])
     loadall(all, fp);
     int num=calculate(fp);
 
-    if(strlen(content)==0 || strcmp(content,"all")==0)
+    if(strlen(content)==0 || strcmp(content,"all")==0 || strcmp(content,"")==0)
     {
         int i;
         for(i=0;i<num;i++) list[i]=all[i];
@@ -734,8 +734,10 @@ int main(void)
                         printf("ERROR: kernel start failed.\n");
                         continue;
                     }
+                    char cont[200];
+                    strcpy(cont,content);
                     int condition=search(content,fp);
-                    if(condition==FAIL) printf("\033[31mERROR: search failed.\033[0m Command format:\nsearch [English or Chinese]\n");
+                    if(condition==FAIL) printf("\033[31mERROR: search failed.\033[0m No word is related to \"%s\". Command format:\nsearch [English or Chinese]\n",cont);
                 } break;
 
                 case 4:  /*list*/
