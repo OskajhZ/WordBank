@@ -632,7 +632,7 @@ void get_kernel(char CurrentKernelStoreFile_name[], char AcquiesentKernelDir[], 
 int main(void)
 {
     printf("\n\033[1m------------------------------------------------------------\n------------------------------------------------------------\033[0m\n");
-    printf("                     \033[7;1m WordBank v0.3 \033[0m\n\n\033[1mCopyright 2024 Xiangnan Zhang\nSchool of Future Technology, Beijing Institute of Technology\n");
+    printf("                     \033[7;1m WordBank v0.4 \033[0m\n\n\033[1mCopyright 2024 Xiangnan Zhang\nSchool of Future Technology, Beijing Institute of Technology\n");
     printf("------------------------------------------------------------\n------------------------------------------------------------\033[0m\n\n");
     
     char WBWorkDir[200], AcquiesentKernelDir[200], CurrentKernelStoreFile_name[200], KernelListFile_name[200];
