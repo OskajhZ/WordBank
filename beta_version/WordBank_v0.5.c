@@ -107,9 +107,9 @@ void printword(word w, char ch)
     if(ch=='y')
     {
         printf("%4d.%2d.%2d ",t->tm_year+1900, t->tm_mon+1, t->tm_mday);
-        printf("%20s ",w.english);
+        printf("\033[1m%20s\033[0m ",w.english);
     }
-    else if(ch=='n') printf("%s ",w.english);
+    else if(ch=='n') printf("\033[1m%s\033[0m ",w.english);
     int i=0;
     while(i<CLASSMAX && strcmp(w.class[i],"")!=0)
     {
@@ -487,9 +487,10 @@ void practice(FILE *fp, char param[], char content[])
         int i;
         for(i=0;i<num;i++) list[i]=all[i];
     }
-    else if(strcmp(content, "t")==0 || strcmp(content,"today")==0)
+    else if(strcmp(content,"y")==0 || strcmp(content,"yesterday")==0 || strcmp(content, "t")==0 || strcmp(content,"today")==0)
     {
         time_t now=time(NULL);
+        if(strcmp(content,"y")==0 || strcmp(content,"yesterday")==0) now-=86400;
         struct tm *now_tm=localtime(&now); 
         int year=now_tm->tm_year, mon=now_tm->tm_mon, day=now_tm->tm_mday;
         int calc=0, i=0;
@@ -505,7 +506,7 @@ void practice(FILE *fp, char param[], char content[])
         num=calc;
         if(calc==0)
         {
-            printf("ERROR: No word stored on %d.%d.%d\n", year+1900, mon+1, day);
+            printf("\033[31mERROR: No word stored on %d.%d.%d\033[0m\n", year+1900, mon+1, day);
             return;
         }
     }
@@ -515,7 +516,7 @@ void practice(FILE *fp, char param[], char content[])
         int condition=date_split(content, &year, &month, &day);
         if(condition==FAIL)
         {
-            printf("ERROR: date format error.\n");
+            printf("\033[31mERROR: date format error.\033[0m\n");
             return;
         }
 
@@ -532,7 +533,7 @@ void practice(FILE *fp, char param[], char content[])
         num=calc;
         if(calc==0)
         {
-            printf("ERROR: No word stored on %d.%d.%d\n", year, month, day);
+            printf("\033[31mERROR: No word stored on %d.%d.%d\033[0m\n", year, month, day);
             return;
         }
     }
@@ -657,7 +658,7 @@ void get_kernel(char CurrentKernelStoreFile_name[], char AcquiesentKernelDir[], 
 int main(void)
 {
     printf("\n\033[1m------------------------------------------------------------\n------------------------------------------------------------\033[0m\n");
-    printf("                     \033[7;1m WordBank v0.4 \033[0m\n\n\033[1mCopyright 2024 Xiangnan Zhang\nSchool of Future Technology, Beijing Institute of Technology\n");
+    printf("                     \033[7;1m WordBank v0.5 \033[0m\n\n\033[1mCopyright 2024 Xiangnan Zhang\nSchool of Future Technology, Beijing Institute of Technology\n");
     printf("------------------------------------------------------------\n------------------------------------------------------------\033[0m\n\n");
     
     char WBWorkDir[200], AcquiesentKernelDir[200], CurrentKernelStoreFile_name[200], KernelListFile_name[200];
@@ -756,7 +757,7 @@ int main(void)
                     }
                     if(fp==NULL) 
                     {
-                        printf("ERROR: kernel start failed.\n");
+                        printf("\033[31mERROR: kernel start failed.\033[0m\n");
                         continue;
                     }
                     char cont[200];
