@@ -491,11 +491,12 @@ void practice(FILE *fp, char param[], char content[])
     {
         time_t now=time(NULL);
         struct tm *now_tm=localtime(&now); 
+        int year=now_tm->tm_year, mon=now_tm->tm_mon, day=now_tm->tm_mday;
         int calc=0, i=0;
         for(i=0;i<num;i++)
         {
             struct tm *t=localtime(&(all[i].timer));
-            if(t->tm_year==now_tm->tm_year && t->tm_mon==now_tm->tm_mon && t->tm_mday==now_tm->tm_mday)
+            if(t->tm_year==year && t->tm_mon==mon && t->tm_mday==day)
             {
                 list[calc]=all[i];
                 calc++;
@@ -504,7 +505,7 @@ void practice(FILE *fp, char param[], char content[])
         num=calc;
         if(calc==0)
         {
-            printf("ERROR: No word stored on %d.%d.%d\n", now_tm->tm_year, now_tm->tm_mon, now_tm->tm_mday);
+            printf("ERROR: No word stored on %d.%d.%d\n", year+1900, mon+1, day);
             return;
         }
     }
