@@ -140,6 +140,9 @@ int classcmp(word w, char str[])
 
 int function_detector(char str[], char param[], char content[])  /*return type and cut str*/
 {
+    strcpy(param,"");
+    strcpy(content,"");
+
     char *first=str;
     for(;*first!=' ' && *first!='\0';first++);
 
@@ -388,7 +391,7 @@ int search(char str[], FILE *fp)  /*3*/
     }
 }
 
-void list(FILE *fp, char param[], char content[])  /*4*/
+void listall(FILE *fp, char param[], char content[])  /*4*/
 {
     word all[MAX];
     loadall(all,fp);
@@ -483,6 +486,27 @@ void practice(FILE *fp, char param[], char content[])
     {
         int i;
         for(i=0;i<num;i++) list[i]=all[i];
+    }
+    else if(strcmp(content, "t")==0 || strcmp(content,"today")==0)
+    {
+        time_t now=time(NULL);
+        struct tm *now_tm=localtime(&now); 
+        int calc=0, i=0;
+        for(i=0;i<num;i++)
+        {
+            struct tm *t=localtime(&(all[i].timer));
+            if(t->tm_year==now_tm->tm_year && t->tm_mon==now_tm->tm_mon && t->tm_mday==now_tm->tm_mday)
+            {
+                list[calc]=all[i];
+                calc++;
+            }
+        }
+        num=calc;
+        if(calc==0)
+        {
+            printf("ERROR: No word stored on %d.%d.%d\n", now_tm->tm_year, now_tm->tm_mon, now_tm->tm_mday);
+            return;
+        }
     }
     else
     {
@@ -755,7 +779,7 @@ int main(void)
                         printf("\033[31mERROR: kernel start failed.\033[0m\n");
                         continue;
                     }
-                    list(fp,param,content);
+                    listall(fp,param,content);
                 } break;
 
                 case 5:  /*calculate word number*/
