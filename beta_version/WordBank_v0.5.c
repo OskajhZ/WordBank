@@ -166,7 +166,7 @@ int function_detector(char str[], char param[], char content[])  /*return type a
         int flag=0;
         for(second=first+1;*second!='\0';second++)
         {
-            if(*second=='-') 
+            if(*second=='-' && (*(second-1)==' ' || *(second-1)=='\0')) 
             {
                 flag=1;
                 break;
