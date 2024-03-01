@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <conio.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -34,13 +35,46 @@ typedef struct
 
 /*Bellow: Assistant Functions*/
 
-void getstr(char *str, int len)
+void getstr(char *str)
 {
-    fgets(str, len, stdin);
+    char ch;
     char *p=str;
-    for(; *p!='\n' && *p!='\0'; p++);
-    *p='\0';
+    do
+    {   
+        ch=getch();
+        if(ch!='\n')
+        {
+            if(ch!=127)
+            {
+                printf("%c",ch);
+                *p=ch;
+                p++;
+            }
+            else
+            {
+                if(p!=str)
+                {
+                    if(*(p-1)<0)
+                    {   
+                        printf("\b\b  \b\b");
+                        p=p-3;
+                    }
+                    else
+                    {   
+                        printf("\b \b");
+                        p=p-1;
+                    }
+                }
+            }
+        }
+        else
+        {
+            *p='\0';
+        }
+    }while(ch!='\n');
+    printf("\n");
 }
+
 
 void fgetstr(char *str, int len, FILE *fp)
 {
@@ -549,7 +583,7 @@ void practice(FILE *fp, char param[], char content[])
         printf("Chinese: ");
 
         char ans[200];
-        getstr(ans,199);
+        getstr(ans);
 
         char *p=strstr(list[idx].chinese, ans);
         if(p==NULL || strlen(ans)==0)
@@ -570,7 +604,7 @@ void practice(FILE *fp, char param[], char content[])
         printf("English: ");
 
         char ans[200];
-        getstr(ans,199);
+        getstr(ans);
 
         char *p=strstr(list[idx].english, ans);
         if(p==NULL || strlen(ans)==0)
@@ -642,7 +676,7 @@ void get_kernel(char CurrentKernelStoreFile_name[], char AcquiesentKernelDir[], 
     if(feof(CurrentKernelStoreFile_fp))
     {
         printf("Kernel path not found. Initialize the path (end with /kernel.wb) or input \".\": ");
-        getstr(kernel_dir, 199);
+        getstr(kernel_dir);
         if(strcmp(kernel_dir,".")==0)
         {
             strcpy(kernel_dir,AcquiesentKernelDir);
@@ -680,7 +714,7 @@ int main(void)
         int type;
         char str[150];
         printf(">>> ");
-        getstr(str,145);
+        getstr(str);
 
         if(strcmp(str,"exit")==0 || strcmp(str,"Exit")==0) break;
         else
