@@ -37,24 +37,24 @@ typedef struct
 
 void getstr(char *str)
 {
-    char ch;
-    char *cursor=str, *end=str+1;
-    int counter=0;
-    char chich[4];
+    char ch;  /*用以存储getch读取的字符*/
+    char *cursor=str, *end=str+1;  /*二者作用于数组str，是控制台中光标与输入结尾在内存中的映射*/
+    int counter=0;  /*用于字节计数*/
+    char chich[4];  /*以字符串的形式存储一个中文字符*/
     do
     {
         ch=getch();
         switch(ch)
         {
-            case 127:
+            case 127:  /*127是backspace键键入的ASCII码*/
                 {
-                    if(cursor==str) continue;
+                    if(cursor<=str) continue;
                     char temp[200];
                     char *p;
                     int i=0;
                     for(p=cursor,i=0;p<end-1;p++,i++) temp[i]=*p;
                     temp[i]='\0';
-                    if(*(cursor-2)>0) {printf("\b%s \b",temp); cursor--; end--;}
+                    if(*(cursor-1)>0) {printf("\b%s \b",temp); cursor--; end--;}
                     else {printf("\b\b%s  \b\b",temp); cursor-=3; end-=3;} 
                     if(end-cursor!=1)
                     {
