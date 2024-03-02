@@ -38,43 +38,135 @@ typedef struct
 void getstr(char *str)
 {
     char ch;
-    char *p=str;
+    char *cursor=str, *end=str+1;
+    int counter=0;
+    char chich[4];
     do
-    {   
+    {
         ch=getch();
-        if(ch!='\n')
+        switch(ch)
         {
-            if(ch!=127)
-            {
-                printf("%c",ch);
-                *p=ch;
-                p++;
-            }
-            else
-            {
-                if(p!=str)
+            case 127:
                 {
-                    if(*(p-1)<0)
-                    {   
-                        printf("\b\b  \b\b");
-                        p=p-3;
+                    if(cursor==str) continue;
+                    char temp[200];
+                    char *p;
+                    int i=0;
+                    for(p=cursor,i=0;p<end-1;p++,i++) temp[i]=*p;
+                    temp[i]='\0';
+                    if(*(cursor-2)>0) {printf("\b%s \b",temp); cursor--; end--;}
+                    else {printf("\b\b%s  \b\b",temp); cursor-=3; end-=3;} 
+                    if(end-cursor!=1)
+                    {
+                        int idx;
+                        for(idx=strlen(temp)-1;idx>=0;idx--)
+                        {
+                            if(temp[idx]>0) printf("\b");
+                            else
+                            {
+                                printf("\b\b");
+                                idx-=2;
+                            }
+                        }   
                     }
-                    else
-                    {   
-                        printf("\b \b");
-                        p=p-1;
+                    strcpy(cursor, temp);
+                } break;
+            case 27:
+                {
+                    char ch2=getch();
+                    char ch3=getch();
+                    if(ch2==91 && ch3==68 && cursor>str) 
+                    {
+                        if(*(cursor-1)>0)
+                        {
+                            printf("\b"); 
+                            cursor--;
+                        }
+                        else
+                        {
+                            printf("\b\b");
+                            cursor-=3;
+                        }
+                    }
+                    else if(ch2==91 && ch3==67 && cursor<end-1) 
+                    {
+                        if(*(cursor)>0)
+                        {
+                            printf("\033[1C"); 
+                            cursor++;
+                        }
+                        else
+                        {
+                            printf("\033[1C\033[1C");
+                            cursor+=3;
+                        }
+                    }
+                    else;
+                } break;
+            default:
+                {
+                    if(ch!='\n')
+                    {    
+                        char temp[200];
+                        int i=0; char *p;
+                        for(i=0;i<200;i++) temp[i]='\0'; i=0;
+                        for(p=cursor;p<end-1;p++,i++) temp[i]=*p;
+                        temp[i]='\0';
+                        if(ch>0)
+                        {
+                            counter=0;
+                            printf("%c",ch);
+                            printf("%s",temp);
+                            if(end-cursor!=1)
+                            {
+                                int idx;
+                                for(idx=strlen(temp)-1;idx>=0;idx--)
+                                {
+                                    if(temp[idx]>0) printf("\b");
+                                    else
+                                    {
+                                        printf("\b\b");
+                                        idx-=2;
+                                    }
+                                }   
+                            }
+                        }
+                        else
+                        {
+                            chich[counter]=ch;
+                            counter++;
+                            if(counter==3) 
+                            {
+                                chich[counter]='\0';
+                                printf("%s",chich);
+                                printf("%s",temp);
+                                counter=0;
+                                if(end-cursor!=1)
+                                {
+                                    int idx;
+                                    for(idx=strlen(temp)-1;idx>=0;idx--)
+                                    {
+                                        if(temp[idx]>0) printf("\b");
+                                        else
+                                        {
+                                            printf("\b\b");
+                                            idx-=2;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        *cursor=ch;
+                        cursor++;
+                        strcpy(cursor,temp);
+                        end++;
                     }
                 }
-            }
-        }
-        else
-        {
-            *p='\0';
         }
     }while(ch!='\n');
     printf("\n");
+    *end='\0';
 }
-
 
 void fgetstr(char *str, int len, FILE *fp)
 {
