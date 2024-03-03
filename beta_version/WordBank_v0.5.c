@@ -23,6 +23,7 @@ limitations under the License.
 #define SUCCESS 1
 #define FAIL 0
 #define MAX 1000
+#define STR_MAX 200
 #define CLASSMAX 5
 
 typedef struct 
@@ -31,9 +32,36 @@ typedef struct
     char class[CLASSMAX][CLASSMAX];
     char chinese[80];
     time_t timer;
+} word_old;
+
+typedef struct 
+{
+    char english[30];
+    char class[CLASSMAX][CLASSMAX];
+    char chinese[80];
+    time_t timer;
+    char note[MAX];
 } word;
 
 /*Bellow: Assistant Functions*/
+
+void str_split(char str[], char store[][STR_MAX])
+{
+    char *end;
+    for(end=str;*end!='\0';end++)
+    {
+        if(*end==' ') *end='\0';
+    }
+    char *p=str; int i=0;
+    while(p!=end)
+    {
+        strcpy(store[i],p);
+        i++;
+        for(;*p!='\0';p++);
+        if(p!=end) for(;*p=='\0'; p++);
+    }
+    store[i][0]='\0';
+}
 
 void getstr(char *str)
 {
@@ -264,11 +292,39 @@ int classcmp(word w, char str[])
 
 /*Below: Operating Functions*/
 
+int upgrade(char content[])
+{
+    char store[4][STR_MAX];
+    str_split(content,store);
+    char old_dir[STR_MAX], new_dir[STR_MAX];
+    strcpy(old_dir, store[0]);
+    strcpy(new_dir, store[1]);
+    if(strlen(old_dir)==0 || strlen(new_dir)==0) return FAIL;
+
+    FILE *old_fp=fopen(old_dir,"rb");
+    FILE *new_fp=fopen(new_dir,"wb");
+    do
+    {
+        word_old w_o; word w;
+        fread(&w_o,sizeof(word_old),1,old_fp);
+        if(feof(old_fp)==0)
+        {
+            strcpy(w.english,w_o.english);
+            int i;
+            for(i=0;i<CLASSMAX;i++) strcpy(w.class[i],w_o.class[i]);
+            strcpy(w.chinese, w_o.chinese);
+            w.timer=w_o.timer;
+            fwrite(&w, sizeof(word), 1, new_fp);
+        }
+    }while(feof(old_fp)==0);
+    fclose(new_fp);
+    return SUCCESS;
+}
+
 int function_detector(char str[], char param[], char content[])  /*return type and cut str*/
 {
     strcpy(param,"");
     strcpy(content,"");
-
     char *first=str;
     for(;*first!=' ' && *first!='\0';first++);
 
@@ -332,6 +388,7 @@ int function_detector(char str[], char param[], char content[])  /*return type a
     else if(strcmp(command, "kernel")==0) return 6;
     else if(strcmp(command, "practice")==0 || strcmp(command, "practise")==0) return 7;
     else if(strcmp(command,"help")==0) return 8;
+    else if(strcmp(command,"upgrade")==0) return 9;
     else return -1;
 }
 
@@ -983,6 +1040,12 @@ int main(void)
                 case 8:
                 {
                     help();
+                } break;
+
+                case 9:
+                {
+                    int condition=upgrade(content);
+                    if(condition==FAIL) printf("\033[31mUpdate Kernel Error:\033[0m directories should be declared.\n");
                 } break;
 
                 default: 
