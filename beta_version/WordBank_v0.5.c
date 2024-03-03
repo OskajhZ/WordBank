@@ -567,6 +567,8 @@ int search(char str[], FILE *fp)  /*3*/
     if(p!=NULL)
     {
         printword(all[tape],'y');
+        printf("\033[2mNOTE:\n");
+        printf("%s\033[0m\n", all[tape].note);
         return SUCCESS;
     }
     else
@@ -797,7 +799,7 @@ int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
    }while(feof(fp_t)!=0);
    condition=remove(temp_name);
    if(condition==-1) return FAIL;
-   fclose(fp); condition=remove(kernel_dir); if(condition-1) return FAIL;
+   fclose(fp); condition=remove(kernel_dir); if(condition==-1) return FAIL;
    FILE *newf=fopen(kernel_dir,"wb");
    for(i=0;i<num;i++) fwrite(&(all[i]), sizeof(word), 1, newf);
    fclose(newf);
@@ -1091,7 +1093,7 @@ int main(void)
                         continue;
                     }
                     fp=fopen(kernel_dir,"rb");
-                }
+                } break;
 
                 default: 
                 {
