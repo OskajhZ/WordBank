@@ -389,6 +389,7 @@ int function_detector(char str[], char param[], char content[])  /*return type a
     else if(strcmp(command, "practice")==0 || strcmp(command, "practise")==0) return 7;
     else if(strcmp(command,"help")==0) return 8;
     else if(strcmp(command,"upgrade")==0) return 9;
+    else if(strcmp(command, "note")==0) return 10;
     else return -1;
 }
 
@@ -770,6 +771,39 @@ void practice(FILE *fp, char param[], char content[])
 
 }
 
+int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
+{
+    word all[MAX];
+    loadall(all, fp);
+    int num=calculate(fp);
+    int i;
+    for(i=0;i<num;i++)
+    {
+        if(strstr(content,all[i].english)!=NULL) break;
+    }
+   char temp_name[200];
+   strcpy(temp_name,WBWorkDir); strcat(temp_name,".temp");
+   FILE *fp_t=fopen(temp_name,"w"); fclose(fp_t);
+   char comm[200]; strcpy(comm,"vi "); strcat(comm,temp_name);
+   int condition=system(comm);
+   if(condition==-1) return FAIL;
+   fp_t=fopen(temp_name,"r");
+   int j=0; 
+   do
+   {
+       char ch=fgetc(fp_t);
+       if(feof(fp_t)!=0) all[i].note[j]=ch;
+       i++;
+   }while(feof(fp_t)!=0);
+   condition=remove(temp_name);
+   if(condition==-1) return FAIL;
+   fclose(fp); condition=remove(kernel_dir); if(condition-1) return FAIL;
+   FILE *newf=fopen(kernel_dir,"wb");
+   for(i=0;i<num;i++) fwrite(&(all[i]), sizeof(word), 1, newf);
+   fclose(newf);
+   return SUCCESS;
+}
+
 void help()
 {
     printf("基础命令如下：\n");
@@ -1047,6 +1081,17 @@ int main(void)
                     int condition=upgrade(content);
                     if(condition==FAIL) printf("\033[31mUpdate Kernel Error:\033[0m directories should be declared.\n");
                 } break;
+
+                case 10:
+                {
+                    int condition=note(content, fp, WBWorkDir, kernel_dir);
+                    if(condition==FAIL)
+                    {
+                        printf("\033[31mAdd Note Error.\033[0m\n");
+                        continue;
+                    }
+                    fp=fopen(kernel_dir,"rb");
+                }
 
                 default: 
                 {
