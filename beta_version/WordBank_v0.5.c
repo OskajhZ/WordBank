@@ -568,7 +568,7 @@ int search(char str[], FILE *fp)  /*3*/
     {
         printword(all[tape],'y');
         printf("\033[2mNOTE:\n");
-        printf("%s\033[0m\n", all[tape].note);
+        printf("%s\033[0m", all[tape].note);
         return SUCCESS;
     }
     else
@@ -784,7 +784,7 @@ int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
         if(strstr(content,all[i].english)!=NULL) break;
     }
    char temp_name[200];
-   strcpy(temp_name,WBWorkDir); strcat(temp_name,".temp");
+   strcpy(temp_name,WBWorkDir); strcat(temp_name,"/.temp");
    FILE *fp_t=fopen(temp_name,"w"); fclose(fp_t);
    char comm[200]; strcpy(comm,"vi "); strcat(comm,temp_name);
    int condition=system(comm);
@@ -794,9 +794,10 @@ int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
    do
    {
        char ch=fgetc(fp_t);
-       if(feof(fp_t)!=0) all[i].note[j]=ch;
-       i++;
-   }while(feof(fp_t)!=0);
+       if(feof(fp_t)==0) all[i].note[j]=ch;
+       j++;
+   }while(feof(fp_t)==0);
+   all[i].note[j-1]='\0';
    condition=remove(temp_name);
    if(condition==-1) return FAIL;
    fclose(fp); condition=remove(kernel_dir); if(condition==-1) return FAIL;
