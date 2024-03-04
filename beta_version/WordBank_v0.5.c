@@ -780,11 +780,12 @@ int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
     word all[MAX];
     loadall(all, fp);
     int num=calculate(fp);
-    int i;
+    int i, found=0;
     for(i=0;i<num;i++)
     {
-        if(strstr(content,all[i].english)!=NULL) break;
+        if(strstr(content,all[i].english)!=NULL) {found=1;break;}
     }
+    if(found==0) return FAIL;
    char temp_name[200];
    strcpy(temp_name,WBWorkDir); strcat(temp_name,"/.temp");
    FILE *fp_t=fopen(temp_name,"w"); 
@@ -801,7 +802,7 @@ int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
        if(feof(fp_t)==0) all[i].note[j]=ch;
        j++;
    }while(feof(fp_t)==0);
-   all[i].note[j-2]='\0';
+   all[i].note[j-2]='\0'; /* Vi在每行末自动追加换行符，换行符个数与行数总相等，因此j-1对应EOF（实际未被写入变量），j-2对应最后一行的换行符 */
    fclose(fp_t);
    condition=remove(temp_name);
    if(condition==-1) return FAIL;
