@@ -314,6 +314,7 @@ int upgrade(char content[])
             for(i=0;i<CLASSMAX;i++) strcpy(w.class[i],w_o.class[i]);
             strcpy(w.chinese, w_o.chinese);
             w.timer=w_o.timer;
+            w.note[0]='\0';
             fwrite(&w, sizeof(word), 1, new_fp);
         }
     }while(feof(old_fp)==0);
@@ -447,6 +448,7 @@ int addword(char str[], FILE *fp) /*1*/
     if(*p=='\0') {return FAIL;}
     else *p='\0';
     word new;
+    new.note[0]='\0';
     int i;
     for(i=0;i<CLASSMAX;i++) strcpy(new.class[i],"");
     strcpy(new.english,str);
@@ -568,7 +570,7 @@ int search(char str[], FILE *fp)  /*3*/
     {
         printword(all[tape],'y');
         printf("\033[2mNOTE:\n");
-        printf("%s\033[0m", all[tape].note);
+        printf("%s\033[0m\n", all[tape].note);
         return SUCCESS;
     }
     else
@@ -785,7 +787,9 @@ int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
     }
    char temp_name[200];
    strcpy(temp_name,WBWorkDir); strcat(temp_name,"/.temp");
-   FILE *fp_t=fopen(temp_name,"w"); fclose(fp_t);
+   FILE *fp_t=fopen(temp_name,"w"); 
+   fputs(all[i].note, fp_t);
+   fclose(fp_t);
    char comm[200]; strcpy(comm,"vi "); strcat(comm,temp_name);
    int condition=system(comm);
    if(condition==-1) return FAIL;
@@ -797,7 +801,7 @@ int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
        if(feof(fp_t)==0) all[i].note[j]=ch;
        j++;
    }while(feof(fp_t)==0);
-   all[i].note[j-1]='\0';
+   all[i].note[j-2]='\0';
    condition=remove(temp_name);
    if(condition==-1) return FAIL;
    fclose(fp); condition=remove(kernel_dir); if(condition==-1) return FAIL;
