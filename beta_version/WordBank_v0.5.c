@@ -802,6 +802,7 @@ int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
        j++;
    }while(feof(fp_t)==0);
    all[i].note[j-2]='\0';
+   fclose(fp_t);
    condition=remove(temp_name);
    if(condition==-1) return FAIL;
    fclose(fp); condition=remove(kernel_dir); if(condition==-1) return FAIL;
