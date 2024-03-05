@@ -553,20 +553,34 @@ int search(char str[], FILE *fp)  /*3*/
     int n=calculate(fp);
     int i;
     int tape=-1;
+    int found=0;
 
-    char *p=NULL;
     for(i=0;i<n;i++)
     {
-        if(str[0]<0) p=strstr(all[i].chinese,str);
-        else p=strstr(all[i].english,str);
-        if(p!=NULL) 
+        if(strcmp(all[i].english, str)==0)
         {
             tape=i;
+            found=1;
             break;
         }
     }
+    
+    char *p=NULL;
+    if(found==0)
+    {
+        for(i=0;i<n;i++)
+        {
+            if(str[0]<0) p=strstr(all[i].chinese,str);
+            else p=strstr(all[i].english,str);
+            if(p!=NULL) 
+            {
+                tape=i;
+                break;
+            }
+        }
+    }
 
-    if(p!=NULL)
+    if(found==1 || p!=NULL)
     {
         printword(all[tape],'y');
         printf("\033[2mNOTE:\n");
