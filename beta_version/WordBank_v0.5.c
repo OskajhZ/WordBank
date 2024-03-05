@@ -196,6 +196,19 @@ void getstr(char *str)
     *end='\0';
 }
 
+void *wash_str(char str[], char cleared[])
+{
+    char *start, *end;
+    for(start=str; *start==' '; start++);
+    for(end=&(str[strlen(str)]); *end=='\0' || *end==' '; end--);
+    char *p; int i;
+    for(p=start,i=0; p<=end; p++,i++)
+    {
+        cleared[i]=*p;
+    }
+    cleared[i]='\0';
+}
+
 void fgetstr(char *str, int len, FILE *fp)
 {
     fgets(str, len, fp);
@@ -223,6 +236,18 @@ void path_split(char full[], char dir[], char file[])
 
 int date_split(char content[], int *year, int *month, int *day)
 {
+    if(content[0]=='p')
+    {
+        char *pnum=content+1;
+        int pday=strtol(pnum, &pnum, 10);
+        time_t timer=time(NULL); timer=timer-pday*86400;
+        struct tm *t=localtime(&timer);
+        *year=t->tm_year+1900;
+        *month=t->tm_mon+1;
+        *day=t->tm_mday;
+        return SUCCESS;
+    }
+
     char *dot_1, *dot_2;
     for(dot_1=content; *dot_1!='.' && *dot_1!='\0'; dot_1++);
     if(*dot_1=='\0' || *(dot_1+1)=='\0')
@@ -689,29 +714,6 @@ void practice(FILE *fp, char param[], char content[])
         int i;
         for(i=0;i<num;i++) list[i]=all[i];
     }
-    else if(strcmp(content,"y")==0 || strcmp(content,"yesterday")==0 || strcmp(content, "t")==0 || strcmp(content,"today")==0)
-    {
-        time_t now=time(NULL);
-        if(strcmp(content,"y")==0 || strcmp(content,"yesterday")==0) now-=86400;
-        struct tm *now_tm=localtime(&now); 
-        int year=now_tm->tm_year, mon=now_tm->tm_mon, day=now_tm->tm_mday;
-        int calc=0, i=0;
-        for(i=0;i<num;i++)
-        {
-            struct tm *t=localtime(&(all[i].timer));
-            if(t->tm_year==year && t->tm_mon==mon && t->tm_mday==day)
-            {
-                list[calc]=all[i];
-                calc++;
-            }
-        }
-        num=calc;
-        if(calc==0)
-        {
-            printf("\033[31mERROR: No word stored on %d.%d.%d\033[0m\n", year+1900, mon+1, day);
-            return;
-        }
-    }
     else
     {
         int year,month,day;
@@ -832,6 +834,7 @@ void help()
     printf("基础命令如下：\n");
     printf("    %-20s 用于计数内核中全部单词。无参数。\n","calculate");
     printf("    %-20s 用于向内核添加单词。\n","addword/add");
+    printf("    %-20s 用于对已添加的单词进行注释。\n","note");
     printf("    %-20s 用于删除内核中已经存在的单词。\n","delword/del");
     printf("    %-20s 用于查询内核中的单词。\n","search");
     printf("    %-20s 用于列出满足特定条件的单词。\n","list");
@@ -1011,9 +1014,10 @@ int main(void)
                     if(strcmp(param,"-h")==0 || strcmp(param,"--help")==0)
                     {
                         printf("该命令用于列出满足特定条件的单词。\n");
-                        printf(    "%-20s 用于列出内核中全部单词\n","list -a/--all");
-                        printf(    "%-20s 按词性列出单词\n","list -c [class]");
-                        printf(    "%-20s 按添加日期列出单词\n","list -d year.month.day");
+                        printf(    "%35s  用于列出内核中全部单词\n","list -a/--all");
+                        printf(    "%35s  按词性列出单词\n","list -c [class]");
+                        printf(    "%35s  按添加日期列出单词\n","list -d [year].[month].[day]");
+                        printf("%35s  列出x天前添加的单词\n", "list -d p[x]");
                         continue;
                     }
                     if(fp==NULL) 
@@ -1087,7 +1091,7 @@ int main(void)
                         printf("参数说明：\n");
                         printf("    -c：给出中文，输入英文。\n    -e：给出英文，输入中文\n");
                         printf("值说明：\n");
-                        printf("    [year].[month].[day]：从在指定日期加入的单词中选词。\n    all：从内核所有单词中选词。\n");
+                        printf("    [year].[month].[day]：从在指定日期加入的单词中选词。\n    all：从内核所有单词中选词。\n    p[x]：从x天前加入的单词中选词。\n");
                         printf("当无参数时，默认给出中文；无值时，默认从整个内核中选词。\n");
                         continue;
                     }
@@ -1105,9 +1109,16 @@ int main(void)
                     if(condition==FAIL) printf("\033[31mUpdate Kernel Error:\033[0m directories should be declared.\n");
                 } break;
 
-                case 10:
+                case 10:  /*note*/
                 {
                     int condition=note(content, fp, WBWorkDir, kernel_dir);
+                    if(strcmp(param,"-h")==0 || strcmp(param,"--help")==0)
+                    {
+                        printf("用于为已添加的单词进行注释。\n");
+                        printf("用法：note [English]\n");
+                        printf("命令执行后将在vi内进行编辑。保存并推出vi界面后，可通过search查看注释。对曾进行注释的单词执行note命令时，原有注释不会被清空，用户可在原有注释的基础上进行修改。\n");
+                        continue;
+                    }
                     if(condition==FAIL)
                     {
                         printf("\033[31mAdd Note Error.\033[0m\n");
