@@ -25,6 +25,7 @@ limitations under the License.
 #define MAX 1000
 #define STR_MAX 200
 #define CLASSMAX 5
+#define FP_CLOSED 2
 
 typedef struct 
 {
@@ -459,8 +460,9 @@ void loadall(word vocab[], FILE *fp) /*No permission to users*/
     }
 }
 
-int addword(char str[], FILE *fp) /*1*/
+int addword(char str[], FILE *fp, char *kernel_dir) /*1*/
 {
+    int k;
     if(strlen(str)<=3) 
     {
         return FAIL;
@@ -510,13 +512,46 @@ int addword(char str[], FILE *fp) /*1*/
     if(*pb=='\0') {return FAIL;}
     strcpy(new.chinese,pb);
 
+    int is_closed=0;  /* to check if the word has been added */
+    word all[MAX];
+    loadall(all, fp);
+    int num=calculate(fp);
+    int found=0;
+    for(i=0; i<num; i++)
+    {
+        if(strcmp(all[i].english, new.english)==0)
+        {
+            found=1;
+            break;
+        }
+    }
+    if(found==1)
+    {
+        int delword(char str[], FILE *fp, char kernel_dir[]); 
+        printf("\033[2mWord \"%s\" has been added, do you want to renew it? (y/n): \033[0m", new.english);
+        char ch[10];
+        getstr(ch);
+        if(strcmp(ch, "y")==0 || strcmp(ch, "Y")==0) 
+        {
+            new=all[i];
+            delword(new.english, fp, kernel_dir);
+            fp=fopen(kernel_dir, "ab");
+            is_closed=FP_CLOSED;
+        }
+        else return SUCCESS;
+    }
+
     new.timer=time(NULL);
 
     fseek(fp,0,2);
     int condition=fwrite(&new,sizeof(word),1,fp);
     if(condition==0) return FAIL;
-
-    return SUCCESS;
+    else if(is_closed==FP_CLOSED) 
+    {
+        fclose(fp);
+        return FP_CLOSED;
+    }
+    else return SUCCESS;
 }
 
 int delword(char str[], FILE *fp, char kernel_dir[])  /*2*/
@@ -576,7 +611,7 @@ int search(char str[], FILE *fp)  /*3*/
     word all[MAX];
     loadall(all,fp);
     int n=calculate(fp);
-    int i;
+int i;
     int tape=-1;
     int found=0;
 
@@ -943,9 +978,9 @@ int main(void)
                         continue;
                     }
                     if(fp==NULL) fp=fopen(kernel_dir,"wb+");
-
                     int before=calculate(fp);
-                    int condition=addword(content,fp);
+                    int condition=addword(content,fp, kernel_dir);
+                    if(condition==FP_CLOSED) fp=fopen(kernel_dir, "rb");
                     if(condition==FAIL)
                     {
                         printf("\033[31mERROR: addword failed.\033[0m Command format:\naddword [English] [class].[Chinese]\n");
