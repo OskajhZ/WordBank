@@ -842,7 +842,7 @@ int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
    FILE *fp_t=fopen(temp_name,"w"); 
    fputs(all[i].note, fp_t);
    fclose(fp_t);
-   char comm[200]; strcpy(comm,"vi "); strcat(comm,temp_name);
+   char comm[200]; strcpy(comm,"vim "); strcat(comm,temp_name);
    int condition=system(comm);
    if(condition==-1) return FAIL;
    fp_t=fopen(temp_name,"r");
