@@ -66,6 +66,8 @@ void str_split(char str[], char store[][STR_MAX])
 
 void getstr(char *str)
 {
+    str[0]='\0';  /* 初始化 */
+
     char ch;  /*用以存储getch读取的字符*/
     char *cursor=str, *end=str+1;  /*二者作用于数组str，是控制台中光标与输入结尾在内存中的映射*/
     int counter=0;  /*用于字节计数*/
