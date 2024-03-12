@@ -574,11 +574,10 @@ int delword(char str[], FILE *fp, char kernel_dir[])  /*2*/
     for(i=0;i<n;i++)
     {
         char *p;
-        if(str[0]<0) p=strstr(all[i].chinese,str);
-        else p=strstr(all[i].english,str);
-        if(p!=NULL) 
+        if(str[0]<0) found=!(strcmp(all[i].chinese, str));
+        else found=!(strcmp(all[i].english,str));
+        if(found==1) 
         {
-            found=1;
             int j;
             for(j=i;j+1<n;j++) all[j]=all[j+1];
             break;
