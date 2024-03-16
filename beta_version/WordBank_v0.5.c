@@ -64,9 +64,12 @@ void str_split(char str[], char store[][STR_MAX])
     store[i][0]='\0';
 }
 
-void getstr(char *str)
+void getstr(char *str, char str_list[][STR_MAX])
 {
     str[0]='\0';  /* 初始化 */
+    int list_idx=0;
+    if(str_list!=NULL) for(; str_list[list_idx][0]!='\0'; list_idx++);
+    int list_rem=list_idx; /* list_rem记录str_list的尾部 */
 
     char ch;  /*用以存储getch读取的字符*/
     char *cursor=str, *end=str+1;  /*二者作用于数组str，是控制台中光标与输入结尾在内存中的映射*/
@@ -101,12 +104,13 @@ void getstr(char *str)
                         }   
                     }
                     strcpy(cursor, temp);
+                    list_idx=list_rem;
                 } break;
             case 27:
                 {
                     char ch2=getch();
                     char ch3=getch();
-                    if(ch2==91 && ch3==68 && cursor>str) 
+                    if(ch2==91 && ch3==68 && cursor>str)  /* left */
                     {
                         if(*(cursor-1)>0)
                         {
@@ -119,7 +123,7 @@ void getstr(char *str)
                             cursor-=3;
                         }
                     }
-                    else if(ch2==91 && ch3==67 && cursor<end-1) 
+                    else if(ch2==91 && ch3==67 && cursor<end-1)  /* right */
                     {
                         if(*(cursor)>0)
                         {
@@ -132,22 +136,95 @@ void getstr(char *str)
                             cursor+=3;
                         }
                     }
+                    else if(ch2==91 && str_list!=NULL)  /* 上下键控制原理：list_idx总指向当前显示的字符串（指向空字符串时显示用户正在输入的文本）*/
+                    {
+                        if(ch3==65 && list_idx>=0)  /* up */
+                        {
+                            list_idx--;
+                            if(list_idx<0)
+                            {
+                                list_idx++;
+                                continue;
+                            }
+
+                            int back_num=cursor-str;  /* to clear the exsisted string in the screen */
+                            for(; back_num>0; back_num--) printf("\b");
+                            int clear_i=0;
+                            for(; clear_i<strlen(str); clear_i++) printf(" ");
+                            for(clear_i=0; clear_i<strlen(str); clear_i++) printf("\b");
+
+                            strcpy(str, str_list[list_idx]);
+                            int sub;
+                            for(sub=0; str[sub]!='\0'; sub++);
+                            cursor=&(str[sub]);
+                            end=cursor+1;
+                            printf("%s", str);
+                        }
+                        else if(ch3==66)  /* down */
+                        {
+                            list_idx++;
+                            if(str_list[list_idx][0]=='\0')
+                            {
+                                list_idx--;
+                                continue;
+                            }
+                            else
+                            {
+                                int back_num=cursor-str;  /* to clear the exsisted string in the screen */
+                                for(; back_num>0; back_num--) printf("\b");
+                                int clear_i=0;
+                                for(; clear_i<strlen(str); clear_i++) printf(" ");
+                                for(clear_i=0; clear_i<strlen(str); clear_i++) printf("\b");
+
+                                strcpy(str, str_list[list_idx]);
+                                int sub;
+                                for(sub=0; str[sub]!='\0'; sub++);
+                                cursor=&(str[sub]);
+                                end=cursor+1;
+                                printf("%s", str);
+                            }
+                        }
+                    }
                     else;
                 } break;
             default:
-                {
-                    if(ch!='\n')
-                    {    
-                        char temp[200];
-                        int i=0; char *p;
-                        for(i=0;i<200;i++) temp[i]='\0'; i=0;
-                        for(p=cursor;p<end-1;p++,i++) temp[i]=*p;
-                        temp[i]='\0';
-                        if(ch>0)
+            {
+                if(ch!='\n')
+                {    
+                    char temp[200];
+                    int i=0; char *p;
+                    for(i=0;i<200;i++) temp[i]='\0'; i=0;
+                    for(p=cursor;p<end-1;p++,i++) temp[i]=*p;
+                    temp[i]='\0';
+                    if(ch>0)
+                    {
+                        counter=0;
+                        printf("%c",ch);
+                        printf("%s",temp);
+                        if(end-cursor!=1)
                         {
-                            counter=0;
-                            printf("%c",ch);
+                            int idx;
+                            for(idx=strlen(temp)-1;idx>=0;idx--)
+                            {
+                                if(temp[idx]>0) printf("\b");
+                                else
+                                {
+                                    printf("\b\b");
+                                    idx-=2;
+                                }
+                            }   
+                        }
+                    }
+                    else
+                    {
+                        chich[counter]=ch;
+                        counter++;
+                        if(counter==3) 
+                        {
+                            chich[counter]='\0';
+                            printf("%s",chich);
                             printf("%s",temp);
+                            counter=0;
                             if(end-cursor!=1)
                             {
                                 int idx;
@@ -159,47 +236,30 @@ void getstr(char *str)
                                         printf("\b\b");
                                         idx-=2;
                                     }
-                                }   
-                            }
-                        }
-                        else
-                        {
-                            chich[counter]=ch;
-                            counter++;
-                            if(counter==3) 
-                            {
-                                chich[counter]='\0';
-                                printf("%s",chich);
-                                printf("%s",temp);
-                                counter=0;
-                                if(end-cursor!=1)
-                                {
-                                    int idx;
-                                    for(idx=strlen(temp)-1;idx>=0;idx--)
-                                    {
-                                        if(temp[idx]>0) printf("\b");
-                                        else
-                                        {
-                                            printf("\b\b");
-                                            idx-=2;
-                                        }
-                                    }
                                 }
                             }
                         }
-                        *cursor=ch;
-                        cursor++;
-                        strcpy(cursor,temp);
-                        end++;
                     }
+                    *cursor=ch;
+                    cursor++;
+                    strcpy(cursor,temp);
+                    end++;
                 }
+                list_idx=list_rem;
+            }
         }
     }while(ch!='\n');
     printf("\n");
-    *end='\0';
+    *(end--)='\0';
+    if(str_list!=NULL)
+    {
+        int append_idx=0;
+        for(; str_list[append_idx][0]!='\0'; append_idx++);
+        strcpy(str_list[append_idx], str);
+    }
 }
 
-void *wash_str(char str[], char cleared[])
+void wash_str(char str[], char cleared[])
 {
     char *start, *end;
     for(start=str; *start==' '; start++);
@@ -210,6 +270,29 @@ void *wash_str(char str[], char cleared[])
         cleared[i]=*p;
     }
     cleared[i]='\0';
+}
+
+void get_dir(char dir[])
+{
+    char str[STR_MAX];
+    getstr(str, NULL);
+    wash_str(str, dir);
+    if(dir[0]=='~')
+    {
+        FILE *fp=popen("cd ~ && pwd", "r");
+        char root_dir[100];
+        int i=0;
+        do
+        {
+            root_dir[i]=fgetc(fp);
+            if(feof(fp)!=0) root_dir[i-1]='\0';
+            i++;
+        }while(feof(fp)==0);
+        char *p=dir+1;
+        strcat(root_dir, p);
+        strcpy(dir, root_dir);
+        pclose(fp);
+    }
 }
 
 void fgetstr(char *str, int len, FILE *fp)
@@ -532,7 +615,7 @@ int addword(char str[], FILE *fp, char *kernel_dir) /*1*/
         int delword(char str[], FILE *fp, char kernel_dir[]); 
         printf("\033[2mWord \"%s\" has been added, do you want to renew it? (y/n): \033[0m", new.english);
         char ch[10];
-        getstr(ch);
+        getstr(ch, NULL);
         if(strcmp(ch, "y")==0 || strcmp(ch, "Y")==0) 
         {
             new=all[i];
@@ -741,14 +824,14 @@ void listall(FILE *fp, char param[], char content[])  /*4*/
 
 void practice(FILE *fp, char param[], char content[])
 {
-    word all[MAX], list[MAX];
+    word all[MAX], u_list[MAX]; /* unshuffled list */
     loadall(all, fp);
     int num=calculate(fp);
 
     if(strlen(content)==0 || strcmp(content,"all")==0 || strcmp(content,"")==0)
     {
         int i;
-        for(i=0;i<num;i++) list[i]=all[i];
+        for(i=0;i<num;i++) u_list[i]=all[i];
     }
     else
     {
@@ -766,7 +849,7 @@ void practice(FILE *fp, char param[], char content[])
             struct tm *t=localtime(&(all[i].timer));
             if((t->tm_year+1900)==year && (t->tm_mon+1)==month && t->tm_mday==day)
             {
-                list[calc]=all[i];
+                u_list[calc]=all[i];
                 calc++;
             }
         }
@@ -778,10 +861,82 @@ void practice(FILE *fp, char param[], char content[])
         }
     }
 
-    time_t timer=time(NULL);
-    unsigned int seed=(unsigned int)timer;
-    srand(seed);
-    int idx=rand()%num;
+    word list[MAX];  /* this block is aimed to shuffle the list */
+    int idx_list[MAX]; idx_list[0]=-1;  /* used to store the index generated by rand() */
+    int idx_i=0; /* idx_list's index, meanwhile it is shuffled's index, because they will increase at the same thime */
+    unsigned int seed_s=time(NULL);
+    while(idx_i<num)
+    {
+        srand(seed_s);
+        seed_s-=10;  /*make the seed different */
+        int idx=rand()%num;
+        int j, idx_found=0; /* j is a pointer used to traverse the idx_list */
+        for(j=0; j<idx_i; j++) /* to check if the index has beed generated */
+        {
+            if(idx_list[j]==idx)
+            {
+                idx_found=1;
+                break;
+            }
+        }
+        if(idx_found==0) 
+        {
+            list[idx]=u_list[idx_i];
+            idx_list[idx_i]=idx;
+            idx_i++;
+        }
+    }
+
+    if(strstr(param, "l")!=NULL)
+    {
+        int i=0;
+        if(strstr(param, "c")!=NULL)
+        {
+            for(; i<num; i++)
+            {
+                printf("%d/%d  %s: ", i+1, num, list[i].chinese);
+                char eng[STR_MAX], eng_washed[STR_MAX];
+                getstr(eng, NULL); wash_str(eng, eng_washed);  /* delete the space at the begining and end of eng, if they exist */
+                if(strcmp(eng_washed, "!q")==0) return;
+                printf("  ");
+                if(strstr(list[i].english, eng_washed)!=NULL && eng_washed[0]!='\0')
+                {
+                    printf("\033[32mCorrect.\033[0m ");
+                    printword(list[i],'n');
+                }
+                else
+                {
+                    printf("\033[31mIncorrect.\033[0m ");
+                    printword(list[i],'n');
+                }
+            }
+        }
+        else
+        {
+            for(; i<num; i++)
+            {
+                printf("%d/%d  %s: ", i+1, num, list[i].english);
+                char chi[STR_MAX], chi_washed[STR_MAX];
+                getstr(chi, NULL); wash_str(chi, chi_washed);  /* delete the space at the begining and end of chi, if they exist */
+                if(strcmp(chi_washed, "!q")==0) return;
+                printf("  ");
+                if(strstr(list[i].chinese, chi_washed)!=NULL && chi_washed[0]!='\0')
+                {
+                    printf("\033[32mCorrect.\033[0m ");
+                    printword(list[i],'n');
+                }
+                else
+                {
+                    printf("\033[31mIncorrect.\033[0m ");
+                    printword(list[i],'n');
+                }
+            }
+        }
+        
+        return;
+    }
+
+    int idx=0;
 
     if(strcmp(param,"-e")==0)
     {
@@ -789,7 +944,7 @@ void practice(FILE *fp, char param[], char content[])
         printf("Chinese: ");
 
         char ans[200];
-        getstr(ans);
+        getstr(ans, NULL);
 
         char *p=strstr(list[idx].chinese, ans);
         if(p==NULL || strlen(ans)==0)
@@ -810,7 +965,7 @@ void practice(FILE *fp, char param[], char content[])
         printf("English: ");
 
         char ans[200];
-        getstr(ans);
+        getstr(ans, NULL);
 
         char *p=strstr(list[idx].english, ans);
         if(p==NULL || strlen(ans)==0)
@@ -921,7 +1076,7 @@ void get_kernel(char CurrentKernelStoreFile_name[], char AcquiesentKernelDir[], 
     if(feof(CurrentKernelStoreFile_fp))
     {
         printf("Kernel path not found. Initialize the path (end with /kernel.wb) or input \".\": ");
-        getstr(kernel_dir);
+        getstr(kernel_dir, NULL);
         if(strcmp(kernel_dir,".")==0)
         {
             strcpy(kernel_dir,AcquiesentKernelDir);
@@ -953,13 +1108,25 @@ int main(void)
     printf("Current kernel directory: %s\n",kernel_dir);
     printf("Current number of words: %d\n",number);
     fclose(fp);
+    
+    char str_list[50][STR_MAX];
+    int init_idx=0;
+    for(; init_idx<50; init_idx++) str_list[init_idx][0]='\0';
 
     while(1)
     {
+        int str_counter=0;
+        for(; str_list[str_counter][0]!='\0'; str_counter++);
+        if(str_counter==40)  /* keep the length of str_list less than 40 */
+        {
+            int move_idx=0;
+            for(; move_idx<str_counter; move_idx++) strcpy(str_list[move_idx], str_list[move_idx+1]);
+        }
+                      
         int type;
         char str[150];
         printf(">>> ");
-        getstr(str);
+        getstr(str, str_list);
 
         if(strcmp(str,"exit")==0 || strcmp(str,"Exit")==0) break;
         else
@@ -1092,6 +1259,23 @@ int main(void)
                         }
                         fclose(fp);
                         strcpy(kernel_dir,content);
+                        if(kernel_dir[0]=='~')
+                        {
+                            FILE *pipe=popen("cd ~ && pwd", "r");
+                            char root_dir[100];
+                            int i=0;
+                            do
+                            {
+                                root_dir[i]=fgetc(pipe); 
+                                if(feof(pipe)!=0) root_dir[i-1]='\0';
+                                i++;
+                            }while(feof(pipe)==0);
+                            pclose(pipe);
+                            char *p=kernel_dir+1;
+                            strcat(root_dir, p);
+                            strcpy(kernel_dir, root_dir);
+                        }
+
                         if(strcmp(kernel_dir,".")==0)
                         {
                             strcpy(kernel_dir,AcquiesentKernelDir);
@@ -1125,7 +1309,7 @@ int main(void)
                     {
                         printf("练习功能，按特定条件随机给出中文或英文，用户输入对应的英文或中文，自动判断用户回答是否正确，并给出正确答案。\n");
                         printf("参数说明：\n");
-                        printf("    -c：给出中文，输入英文。\n    -e：给出英文，输入中文\n");
+                        printf("    -c：给出中文，输入英文。\n    -e：给出英文，输入中文\n    -l：乱序逐个给出中文或英文\n    c或e可与l搭配使用，不要求结合顺序\n");
                         printf("值说明：\n");
                         printf("    [year].[month].[day]：从在指定日期加入的单词中选词。\n    all：从内核所有单词中选词。\n    p[x]：从x天前加入的单词中选词。\n");
                         printf("当无参数时，默认给出中文；无值时，默认从整个内核中选词。\n");
