@@ -70,6 +70,7 @@ void getstr(char *str, char str_list[][STR_MAX])
     int list_idx=0;
     if(str_list!=NULL) for(; str_list[list_idx][0]!='\0'; list_idx++);
     int list_rem=list_idx; /* list_rem记录str_list的尾部 */
+    int keep=0;  /* 用于后续上下键控制，表明是否记录当前字符串 */
 
     char ch;  /*用以存储getch读取的字符*/
     char *cursor=str, *end=str+1;  /*二者作用于数组str，是控制台中光标与输入结尾在内存中的映射*/
@@ -105,6 +106,7 @@ void getstr(char *str, char str_list[][STR_MAX])
                     }
                     strcpy(cursor, temp);
                     list_idx=list_rem;
+                    keep=0;
                 } break;
             case 27:
                 {
@@ -138,6 +140,14 @@ void getstr(char *str, char str_list[][STR_MAX])
                     }
                     else if(ch2==91 && str_list!=NULL)  /* 上下键控制原理：list_idx总指向当前显示的字符串（指向空字符串时显示用户正在输入的文本）*/
                     {
+                        char currency[STR_MAX];
+                        if(keep==0)
+                        {
+                            char *p; int i=0;
+                            for(p=str; p<end-1; p++, i++) currency[i]=*p;
+                            currency[i]='\0';
+                        }
+
                         if(ch3==65 && list_idx>=0)  /* up */
                         {
                             list_idx--;
@@ -159,11 +169,13 @@ void getstr(char *str, char str_list[][STR_MAX])
                             cursor=&(str[sub]);
                             end=cursor+1;
                             printf("%s", str);
+
+                            keep=1;
                         }
                         else if(ch3==66)  /* down */
                         {
                             list_idx++;
-                            if(str_list[list_idx][0]=='\0')
+                            if(str_list[list_idx][0]=='\0' && str_list[list_idx-1][0]=='\0')
                             {
                                 list_idx--;
                                 continue;
@@ -176,12 +188,15 @@ void getstr(char *str, char str_list[][STR_MAX])
                                 for(; clear_i<strlen(str); clear_i++) printf(" ");
                                 for(clear_i=0; clear_i<strlen(str); clear_i++) printf("\b");
 
-                                strcpy(str, str_list[list_idx]);
+                                if(str_list[list_idx][0]!='\0') strcpy(str, str_list[list_idx]);
+                                else strcpy(str, currency);
                                 int sub;
                                 for(sub=0; str[sub]!='\0'; sub++);
                                 cursor=&(str[sub]);
                                 end=cursor+1;
                                 printf("%s", str);
+
+                                keep=1;
                             }
                         }
                     }
@@ -246,6 +261,7 @@ void getstr(char *str, char str_list[][STR_MAX])
                     end++;
                 }
                 list_idx=list_rem;
+                keep=0;
             }
         }
     }while(ch!='\n');
