@@ -1035,7 +1035,7 @@ int note(char content[], FILE *fp, char WBWorkDir[], char kernel_dir[])
     int i, found=0;
     for(i=0;i<num;i++)
     {
-        if(strstr(content,all[i].english)!=NULL) {found=1;break;}
+        if(strcmp(content,all[i].english)==0) {found=1;break;}
     }
     if(found==0) return FAIL;
    char temp_name[200];
@@ -1237,9 +1237,9 @@ void get_kernel(char CurrentKernelStoreFile_name[], char AcquiesentKernelDir[], 
 
 int main(void)
 {
-    printf("\n\033[1m------------------------------------------------------------\n------------------------------------------------------------\033[0m\n");
-    printf("                     \033[7;1m WordBank v0.6 \033[0m\n\n\033[1mCopyright 2024 Xiangnan Zhang\nSchool of Future Technology, Beijing Institute of Technology\n");
-    printf("------------------------------------------------------------\n------------------------------------------------------------\033[0m\n\n");
+    printf("\n\033[1m---------------------------------------------------------------\n---------------------------------------------------------------\033[0m\n");
+    printf("                     \033[7;1m WordBank v0.6 \033[0m\n\n\033[1mCopyright 2024 Xiangnan Zhang\nSchool of Future Technologies, Beijing Institute of Technology\n");
+    printf("---------------------------------------------------------------\n---------------------------------------------------------------\033[0m\n\n");
     
     char WBWorkDir[200], AcquiesentKernelDir[200], CurrentKernelStoreFile_name[200], KernelListFile_name[200];
     rc_init(WBWorkDir, AcquiesentKernelDir, CurrentKernelStoreFile_name, KernelListFile_name);
