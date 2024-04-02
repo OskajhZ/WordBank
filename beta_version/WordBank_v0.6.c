@@ -869,6 +869,10 @@ void listall(FILE *fp, char param[], char content[])  /*4*/
 
 void practice(FILE *fp, char param[], char content[])
 {
+    char *space=content;
+    for(; *space!='\0'; space++) 
+      if(*space==' ') *space='_';
+
     word all[MAX], u_list[MAX]; /* unshuffled list */
     loadall(all, fp);
     int num=calculate(fp);
@@ -942,6 +946,9 @@ void practice(FILE *fp, char param[], char content[])
                 printf("%d/%d  %s: ", i+1, num, list[i].chinese);
                 char eng[STR_MAX], eng_washed[STR_MAX];
                 getstr(eng, NULL); wash_str(eng, eng_washed);  /* delete the space at the begining and end of eng, if they exist */
+                char *space=eng_washed;
+                for(; *space!='\0'; space++)
+                  if(*space==' ') *space='_';
                 if(strcmp(eng_washed, "!q")==0) return;
                 printf("  ");
                 if(strstr(list[i].english, eng_washed)!=NULL && eng_washed[0]!='\0')
@@ -1011,6 +1018,9 @@ void practice(FILE *fp, char param[], char content[])
 
         char ans[200];
         getstr(ans, NULL);
+        char *space=ans;
+        for(; *space!='\0'; space++)
+          if(*space==' ') *space='_';
 
         char *p=strstr(list[idx].english, ans);
         if(p==NULL || strlen(ans)==0)
