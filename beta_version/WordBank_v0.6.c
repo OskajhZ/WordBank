@@ -1464,7 +1464,7 @@ int main(void)
                     else if(strstr(param, "l")!=NULL)
                     {
                         int condition=kernel_list(KernelListFile_name, kernel_dir, param, content);
-                        if(condition==FAIL) printf("\033Error.\033[0m Use 'a', 's' or 'd' after parameter 'l'.\n");
+                        if(condition==FAIL) printf("\033[31mError.\033[0m Use 'a', 's' or 'd' after parameter 'l'.\n");
                     }
                     else printf("\033[31mInvalid parameter.\033[0m Available:\n-c: change kernel path\n-p: print current kernel path\n");
                 } break;
